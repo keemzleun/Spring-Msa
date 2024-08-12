@@ -1,15 +1,16 @@
-package com.beyond.ordersystem.product.dto;
+package com.beyond.ordersystem.ordering.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 @Builder
-public class ProductSearchDto {
-    private String category;
-    private String searchName;
+public class ProductUpdateStockDto {
+    private Long productId;
+    private Integer productQuantity;
+
 }

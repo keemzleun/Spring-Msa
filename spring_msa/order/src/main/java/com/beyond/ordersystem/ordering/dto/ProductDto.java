@@ -1,4 +1,4 @@
-package com.beyond.ordersystem.product.dto;
+package com.beyond.ordersystem.ordering.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProductResDto {
+public class ProductDto {
     private Long id;
     private String name;
     private String category;

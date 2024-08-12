@@ -58,7 +58,7 @@ public class JwtAuthFilter extends GenericFilter { // 필터구현을 위해 Gen
                 UserDetails userDetails = new User(claims.getSubject(), "", authorities); // subject : 일반적으로 이메일 혹은 id같은 고유 식별자
                 // Authentication 객체 만드는 이유 : 전역적으로 만들어서 사용하기 위해 만듦 (이 사용자가 누군지 식별하기 위해)
                 // Authentication 객체 : 사용자의 인증정보. Spring Security는 현재 사용자가 누구인지 식별할 수 있다.
-                Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails,"",userDetails.getAuthorities());
+                Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, bearerToken,userDetails.getAuthorities());
                 // 현재 스레드의 SecurityContext가져옴(현재 인증된 사용자와 관련된 보안정보를 저장하는 컨텍스트)
                 SecurityContextHolder.getContext().setAuthentication(authentication); // 생성된 Authentication객체를 SecurityContext에 설정한다.
                 // 이를 통해 현제 스레드에서 요청을 처리하는 동안 애플리케이션은 사용자의 인증정보를 전역적으로 사용할 수 있게 된다.

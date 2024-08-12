@@ -44,8 +44,23 @@ dependencies {
 
 	// 동시성 제어를 위한 이벤트 기반 rabbitmq 의존성 추가
 	implementation 'org.springframework.boot:spring-boot-starter-amqp'
-}
 
+	// 유레카에 소속된 서비스임을 명시
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
+	implementation 'org.springframework.kafka:spring-kafka'
+
+
+}
+// 스프링 클라우드에 대한 버전 지정
+ext {
+	set('springCloudVersion', '2021.0.8')
+}
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
 tasks.named('test') {
 	useJUnitPlatform()
 }

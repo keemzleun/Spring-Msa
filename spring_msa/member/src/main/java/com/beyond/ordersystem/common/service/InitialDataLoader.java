@@ -20,10 +20,10 @@ public class InitialDataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception{
-        if(memberRepository.findByEmail("admin@test.com").isEmpty()){
+        if(memberRepository.findByEmail("admin@naver.com").isEmpty()){
             memberService.memberCreate(MemberSaveReqDto.builder()
                     .name("admin")
-                    .email("admin@test.com")
+                    .email("admin@naver.com")
                     .password("12341234")
                     .role(Role.ADMIN)
                     .build());

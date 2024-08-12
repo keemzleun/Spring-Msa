@@ -1,10 +1,12 @@
 package com.beyond.ordersystem.product.Service;
 import com.beyond.ordersystem.common.service.StockInventoryService;
+import com.beyond.ordersystem.product.Controller.ProductController;
 import com.beyond.ordersystem.product.Repository.ProductRepository;
 import com.beyond.ordersystem.product.domain.Product;
 import com.beyond.ordersystem.product.dto.ProductResDto;
 import com.beyond.ordersystem.product.dto.ProductSaveReqDto;
 import com.beyond.ordersystem.product.dto.ProductSearchDto;
+import com.beyond.ordersystem.product.dto.ProductUpdateStockDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -18,6 +20,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -49,58 +52,53 @@ public class ProductService {
         this.stockInventoryService = stockInventoryService;
     }
 
-    public Product productCreate(ProductSaveReqDto dto){
+    public Product createProduct(ProductSaveReqDto dto) {
         MultipartFile image = dto.getProductImage();
         Product product = null;
-        try{
+        try {
             product = productRepository.save(dto.toEntity());
             byte[] bytes = image.getBytes();
-            // 경로지정
-            Path path = Paths.get("/Users/wisdom/Documents/GitHub/spring_ordersystem/src/main/java/com/beyond/ordersystem/product/tmp/",
-                    product.getId() +"_"+
-                    image.getOriginalFilename());
-            // 파일 쓰기
-            Files.write(path, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE); // 해당경로에 bytes 저장
-            product.updateImagePath(path.toString());
+            Path path = Paths.get("/Users/keemzleun/study/tmpimg/",
+                    product.getId() + "_" + image.getOriginalFilename());
+            Files.write(path, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+            product.updateImagePath(path.toString());   // 더티 체킹. 변경 감기
 
             if(dto.getName().contains("sale")){
-                // 만약 "sale" 상태라면 redis-increaseStock 메소드 실행
                 stockInventoryService.increaseStock(product.getId(), dto.getStockQuantity());
             }
-        }catch (IOException e){
-            throw new RuntimeException("이미지 저장실패");
+
+        } catch (IOException e) {
+            // 예외를 터뜨려줘야지 잡아버리면 안됨
+            throw new RuntimeException("이미지 저장 실패");
         }
         return product;
     }
-
-    public Product productAwsCreate(ProductSaveReqDto dto){
+    public Product awsCreateProduct(ProductSaveReqDto dto) {
         MultipartFile image = dto.getProductImage();
         Product product = null;
 
-        try{
+        try {
             product = productRepository.save(dto.toEntity());
             byte[] bytes = image.getBytes();
             String fileName = product.getId() + "_" + image.getOriginalFilename();
-            // 경로지정
-            Path path = Paths.get("/Users/wisdom/Documents/GitHub/spring_ordersystem/src/main/java/com/beyond/ordersystem/product/tmp/",fileName);
-
-            // local PC에 임시저장 : 파일 쓰기
-            Files.write(path, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE); // 해당경로에 bytes 저장
+            Path path = Paths.get("/Users/keemzleun/study/tmpimg/", fileName);
+            // local pc에 임시 저장
+            Files.write(path, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
 
             // aws에 pc에 저장된 파일을 업로드
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucket)
                     .key(fileName)
                     .build();
-
-            PutObjectResponse putObjectResponse = s3Client.putObject(putObjectRequest, RequestBody.fromFile(path)); // path에 담겨있는 file을 가져다가 upload
-            String s3Path = s3Client.utilities().getUrl(a->a.bucket(bucket).key(fileName)).toExternalForm(); // 어디서든 접근가능한 Url형태로 path를 얻어냄
-            product.updateImagePath(s3Path);
-
-        }catch (IOException e){
-            throw new RuntimeException("이미지 저장실패");
+            PutObjectResponse putObjectResponse = s3Client.putObject(putObjectRequest, RequestBody.fromFile(path));
+            String s3Path = s3Client.utilities().getUrl(a->a.bucket(bucket).key(fileName)).toExternalForm();
+            product.updateImagePath(s3Path);   // 더티 체킹. 변경 감기
+        } catch (IOException e) {
+            // 예외를 터뜨려줘야지 잡아버리면 안됨
+            throw new RuntimeException("이미지 저장 실패");
         }
         return product;
+
     }
 
 
@@ -134,6 +132,16 @@ public class ProductService {
         Page<Product> products = productRepository.findAll(specification, pageable);
         Page<ProductResDto> productResDtos = products.map(a->a.fromEntity());
         return productResDtos;
+    }
+
+    public ProductResDto productDetail(Long id){
+        return productRepository.findById(id).orElseThrow(()->new EntityNotFoundException("존재하지 않는 id입니다.")).fromEntity();
+    }
+
+    public Product productUpdateStock(ProductUpdateStockDto dto){
+        Product product = productRepository.findById(dto.getProductId()).orElseThrow(()-> new EntityNotFoundException("존재하지 않는 상품입니다"));
+        product.updateStockQuantity(dto.getProductQuantity());
+        return product;
     }
 
 

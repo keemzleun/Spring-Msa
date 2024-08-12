@@ -1,16 +1,15 @@
-package com.beyond.ordersystem.member.dto;
+package com.beyond.ordersystem.product.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 @Builder
-public class MemberLoginDto {
-    private String email;
-    private String password;
-
+public class ProductUpdateStockDto {
+    private Long productId;
+    private Integer productQuantity;
 }

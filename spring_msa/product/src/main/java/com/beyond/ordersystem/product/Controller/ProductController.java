@@ -6,6 +6,7 @@ import com.beyond.ordersystem.product.domain.Product;
 import com.beyond.ordersystem.product.dto.ProductResDto;
 import com.beyond.ordersystem.product.dto.ProductSaveReqDto;
 import com.beyond.ordersystem.product.dto.ProductSearchDto;
+import com.beyond.ordersystem.product.dto.ProductUpdateStockDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +33,7 @@ public class ProductController {
     @PostMapping("product/create")
     // 둘다 json으로 받고 싶으면 @RequestPart ProductSaveReqDto dto, @RequestPart MultipartFile productImage
     public ResponseEntity<Object> registerProduct(@ModelAttribute ProductSaveReqDto dto){ // multipart form data형식으로 받음
-        Product product = productService.productAwsCreate(dto);
+        Product product = productService.awsCreateProduct(dto);
         // body에 들어가는 HttpStatus상태
         CommonResDto commonResDto = new CommonResDto(HttpStatus.CREATED, "product등록 성공", product.getId());
         return new ResponseEntity<>(commonResDto, HttpStatus.CREATED); //header에 들어가는 상태
@@ -42,6 +43,20 @@ public class ProductController {
     public ResponseEntity<Object> productList(ProductSearchDto searchDto, Pageable pageable){
         Page<ProductResDto> dtos = productService.productList(searchDto, pageable);
         CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "상품리스트 정상조회 완료",dtos);
+        return new ResponseEntity<>(commonResDto, HttpStatus.OK);
+    }
+
+    @GetMapping("/product/{id}")
+    public ResponseEntity<?> productDetail(@PathVariable Long id){
+        ProductResDto dto = productService.productDetail(id);
+        CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "상품리스트 정상조회 완료",dto);
+        return new ResponseEntity<>(commonResDto, HttpStatus.OK);
+    }
+
+    @PutMapping("/product/updatestock")
+    public ResponseEntity<?> productStockUpdate(@RequestBody ProductUpdateStockDto dto){
+        Product product = productService.productUpdateStock(dto);
+        CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "상품 정상변경 완료",product.getId());
         return new ResponseEntity<>(commonResDto, HttpStatus.OK);
     }
 
