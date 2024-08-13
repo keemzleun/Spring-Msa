@@ -7,11 +7,15 @@ import com.beyond.ordersystem.product.dto.ProductResDto;
 import com.beyond.ordersystem.product.dto.ProductSaveReqDto;
 import com.beyond.ordersystem.product.dto.ProductSearchDto;
 import com.beyond.ordersystem.product.dto.ProductUpdateStockDto;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+//import org.springframework.kafka.annotation.KafkaHandler;
+//import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -145,4 +149,22 @@ public class ProductService {
     }
 
 
-}
+//    @KafkaListener(topics = "product-update-topic", groupId = "order-group", containerFactory = "kafkaListenerContainerFactory")
+//    public void consumerProductQuantity(String message){
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        try {
+//            ProductUpdateStockDto productUpdateStockDto
+//                    = objectMapper.readValue(message, ProductUpdateStockDto.class);
+//            System.out.println(productUpdateStockDto);
+//            this.productUpdateStock(productUpdateStockDto);
+//        } catch (JsonProcessingException e){
+//            throw new RuntimeException(e);
+//        } catch (Exception e){
+//            throw new RuntimeException(e);
+//        }
+
+    }
+
+
+
+
